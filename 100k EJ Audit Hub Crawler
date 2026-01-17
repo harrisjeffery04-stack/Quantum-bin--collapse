@@ -1,0 +1,33 @@
+name: 100k EJ Audit Hub Crawler
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+  workflow_dispatch: # Allows manual run
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Audit Engine
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+        run: python audit_hub.py
+
+      - name: Commit & Push Progress
+        run: |
+          git config --global user.name "Black Swan Bot"
+          git config --global user.email "bot@blackswantechnologies.com"
+          git add .
+          git commit -m "Update 100k Gold Standard Ledger" || exit 0
+          git push
